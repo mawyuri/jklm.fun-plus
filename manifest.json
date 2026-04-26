@@ -1,7 +1,7 @@
 {
 	"name": "JKLM.fun+",
 	"description": "QoL improvements and extra features for JKLM.fun",
-	"version": "1.0",
+	"version": "1.0.1",
 	"manifest_version": 3,
 	"icons":
 	{
@@ -16,7 +16,7 @@
 	"content_scripts": [
 		{
 			"js": ["scripts/content.js"],
-			
+			"css": ["css/content.css"],
 			"matches": ["https://jklm.fun/*"],
 			"world": "MAIN"
 		}
