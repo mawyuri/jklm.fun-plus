@@ -16,7 +16,7 @@
 	"content_scripts": [
 		{
 			"js": ["scripts/content.js"],
-			"css": ["css/content.css"],
+			
 			"matches": ["https://jklm.fun/*"],
 			"world": "MAIN"
 		}
