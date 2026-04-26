@@ -1,3 +1,11 @@
+try {
+	$('a') // Check if content is running in the MAIN world
+} catch {
+	const script = document.createElement('script');
+	script.src = chrome.runtime.getURL('scripts/content.js');
+	(document.body).appendChild(script);
+}
+
 const win = window;
 const doc = document;
 const log = (x) => console.log(x);
