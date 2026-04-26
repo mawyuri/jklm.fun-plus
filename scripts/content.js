@@ -229,7 +229,7 @@ ready().then(() => {
 				})
 				.then(data=> {
 					var profile = data['data'];
-					var currentTime = Math.floor(Date.now() / 1000)
+					var currentTime = Math.floor(Date.now() / 1000);
 					var lastOnline = currentTime - profile.ping;
 					var playing = profile.room;
 					var isOnline = lastOnline <= 180;
@@ -248,28 +248,39 @@ ready().then(() => {
 	if (myPlusId !== -1){
 		// Logged in
 		// log(`JKLM+ ID: ${myPlusId}`);
-		ping(myPlusId); setInterval(() => { ping(myPlusId); }, 120 * 1e3); if
-		(!inGame){ try { fetch(`${plusEndpoint}/friends.php?id=$
-		{myPlusId}`) .then(response => { if (!response.ok)
-		{ friendsScroller.style.gap = '10px';
-		friendsScroller.style.flexFlow = 'column';
-		friendsScroller.style.alignItems = 'center';
-		friendsScroller.innerHTML = `<span style="font-size:1em;">It's
-		feeling lonely in here, add some friends and fill this list
-		up!</span>` } return response.json(); }) .then(data =>
-		{ data.forEach(profile => { var currentTime = Math.floor(Date.now
-		() / 1000) var lastOnline = currentTime - profile.ping; var
-		playing = profile.room; var isOnline = lastOnline <= 180;
-		appendPerson(profile.id, profile.nickname, isOnline, isOnline ?
-		(playing ? `Playing in ${playing}` : `Browsing rooms`) : `Last
-		online ${getRelativeTime
-		(profile.ping)}`, profile.picture); }) }); } catch
-		{ friendsScroller.style.gap = '10px';
-		friendsScroller.style.flexFlow = 'column';
-		friendsScroller.style.alignItems = 'center';
-		friendsScroller.innerHTML = `<span style="font-size:1em;">It's
-		feeling lonely in here, add some friends and fill this list
-		up!</span>` } } }
+		ping(myPlusId);
+		setInterval(() => {
+			ping(myPlusId);
+		}, 120 * 1e3);
+		if (!inGame){
+			try {
+				fetch(`${plusEndpoint}/friends.php?id=${myPlusId}`)
+				.then(response => {
+					if (!response.ok){
+						friendsScroller.style.gap = '10px';
+						friendsScroller.style.flexFlow = 'column';
+						friendsScroller.style.alignItems = 'center';
+						friendsScroller.innerHTML = `<span style="font-size:1em;">It's feeling lonely in here, add some friends and fill this list up!</span>`
+					}
+					return response.json();
+				})
+				.then(data => {
+					data.forEach(profile => {
+						var currentTime = Math.floor(Date.now() / 1000)
+						var lastOnline = currentTime - profile.ping;
+						var playing = profile.room;
+						var isOnline = lastOnline <= 180;
+						appendPerson(profile.id, profile.nickname, isOnline, isOnline ? (playing ? `Playing in ${playing}` : `Browsing rooms`) : `Last online ${getRelativeTime(profile.ping)}`, profile.picture);
+					})
+				});
+			} catch {
+				friendsScroller.style.gap = '10px';
+				friendsScroller.style.flexFlow = 'column';
+				friendsScroller.style.alignItems = 'center';
+				friendsScroller.innerHTML = `<span style="font-size:1em;">It's feeling lonely in here, add some friends and fill this list up!</span>`
+			}
+		}
+	}
 
 	if (plusId === null){
 		// Guest
