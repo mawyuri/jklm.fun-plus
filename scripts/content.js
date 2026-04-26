@@ -735,13 +735,15 @@ ready().then(() => {
 			pelement.appendChild(pnick);
 			pelement.appendChild(pstatus);
 
+			var prequestDiv = n('div');
+			var prequest = n('span');
+			prequestDiv.appendChild(prequest);
+			pelement.appendChild(prequestDiv);
+			prequest.style.fontSize = '.6em';
+			prequest.innerHTML = `<a class="decline" href="#">Unfriend</a>`;
+
 			if (isRequest) {
-				var prequestDiv = n('div');
-				var prequest = n('span');
 				prequest.innerHTML = `<a class="accept" href="#">Accept</a> / <a class="decline" href="#">Decline</a>`;
-				prequest.style.fontSize = '.6em';
-				prequestDiv.appendChild(prequest);
-				pelement.appendChild(prequestDiv);
 
 				$(prequest, '.accept').addEventListener('click', event => {
 					fetch(`${plusEndpoint}/request.php`, {
@@ -756,32 +758,33 @@ ready().then(() => {
 					}).then(response=>response.json())
 					.then(data=>{
 						if (data.status) {
-							prequestDiv.remove();
+							$(prequest, '.accept').remove();
+							prequest.innerHTML = `<a class="decline" href="#">Unfriend</a>`;
 							friendsScroller.appendChild(person.div);
 						}
 					})
 				});
-
-				$(prequest, '.decline').addEventListener('click', event => {
-					fetch(`${plusEndpoint}/request.php`, {
-						method: 'POST',
-						headers: {'Content-Type': 'application/json'},
-						body: JSON.stringify({
-							id: myPlusId,
-							other: id,
-							service: settings.auth.service,
-							token: getPlusToken(),
-							request: -1
-						})
-					}).then(response=>response.json())
-					.then(data=>{
-						if (data.status) {
-							person.div.remove();
-							clearInterval(person.fetchInterval);
-						}
-					})
-				});
 			}
+
+			$(prequest, '.decline').addEventListener('click', event => {
+				fetch(`${plusEndpoint}/request.php`, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({
+						id: myPlusId,
+						other: id,
+						service: settings.auth.service,
+						token: getPlusToken(),
+						request: -1
+					})
+				}).then(response=>response.json())
+				.then(data=>{
+					if (data.status) {
+						person.div.remove();
+						clearInterval(person.fetchInterval);
+					}
+				})
+			});
 
 			person.div = pelement;
 			person.changeImage = function(picture) {
