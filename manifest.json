@@ -1,28 +1,19 @@
 {
 	"name": "JKLM.fun+",
 	"description": "QoL improvements and extra features for JKLM.fun",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"manifest_version": 3,
 	"icons":
 	{
-		"16": "images/16.png",
-		"32": "images/32.png",
-		"48": "images/48.png",
-		"128": "images/128.png"
-	},
-	"background": {
-		"service_worker": "scripts/background.js"
+		"16": "src/images/16.png",
+		"32": "src/images/32.png",
+		"48": "src/images/48.png",
+		"128": "src/images/128.png"
 	},
 	"content_scripts": [
 		{
-			"js": ["scripts/content.js"],
-			"css": ["css/content.css"],
-			"matches": ["https://jklm.fun/*"],
-			"world": "MAIN"
+			"js": ["src/loader.js"],
+			"matches": ["https://jklm.fun/*"]
 		}
-	],
-	"web_accessible_resources": [{
-		"resources": ["scripts/content.js"],
-		"matches": ["https://jklm.fun/*"]
-	}]
+	]
 }

@@ -1,0 +1,100 @@
+.square {
+	height: auto;
+}
+
+.comment {
+	font-size: small;
+	color: grey;
+}
+
+.jklmp-modal {
+	display: none;
+	position: fixed;
+	z-index: 2;
+	left: 0;
+	right: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+.jklmp-modal-content {
+	background-color: white;
+	width: 80%;
+	margin: 15% auto;
+	padding: 20px;
+}
+
+.jklmp-modal-close {
+	color: #aaa;
+	float: right;
+	font-size: 16px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+/* Auth modal */
+.auth-modal-section {
+	width: 50%;
+}
+
+.profile-form {
+	display: flex;
+	margin: 0;
+	padding: 0;
+	width: 160%;
+	justify-content: flex-start;
+	align-items: flex-start;
+	flex-direction: row;
+}
+
+.form-nickname {
+	width: 42%;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.form-service {
+	width: 80%;
+}
+
+.form-service-text {
+	padding: 0.5em 0.5em 0;
+	margin-bottom: 0.5em;
+	font-size: 0.8em;
+}
+
+.form-service-list {
+	display: flex;
+	padding-left: 0.5em;
+	gap: 0.1em;
+}
+
+.auth-modal-chat-log {
+	font-family: "Varela Round";
+	font-weight: 400;
+	color: rgb(204,204,204);
+	background-color: #202020;
+	width: 100%;
+	height: 9em;
+	font-size: 0.8em;
+	padding: 1em;
+	overflow: scroll;
+	display: flex;
+	flex-direction: column;
+	row-gap: 0.4375em;
+	flex-wrap: nowrap;
+}
+
+.auth-modal-chat-area {
+	width: 100%;
+	height: 30%;
+	margin: 0;
+	border: none;
+	background-color: #101010;
+	border-radius: 0px;
+	color: #eee;
+	padding: 0.5em;
+	font-family: "Varela Round";
+}
