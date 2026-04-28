@@ -22,10 +22,10 @@ export async function getPlusId(authId) {
 export async function getPerson(person) {
 	if (!person) return null;
 	try {
-		const response = $apiget(`person.php?id=${person}`);
+		const response = await $apiget(`person.php?id=${person}`);
 		const data = await response.json();
 		if (data) {
-			return data;
+			return data.data;
 		} else return null;
 	}
 	catch (e) {};
@@ -34,7 +34,7 @@ export async function getPerson(person) {
 export async function getFriends(person) {
 	if (!person) return null;
 	try {
-		const response = $apiget(`friends.php?id=${person}`);
+		const response = await $apiget(`friends.php?id=${person}`);
 		const data = await response.json();
 		if (data) {
 			return data;
@@ -46,7 +46,7 @@ export async function getFriends(person) {
 export async function createAccount(auth, authId, token, nickname, picture) {
 	if (!auth || !authId || !token || !nickname) return null;
 	try {
-		const response = $apipost(`register.php`, {
+		const response = await $apipost(`register.php`, {
 			service: auth.service,
 			authid: authId,
 			token: token,
@@ -62,7 +62,7 @@ export async function createAccount(auth, authId, token, nickname, picture) {
 export async function pingBackend(plusId, auth, token, room) {
 	if (!plusId || !auth || !token) return null;
 	try {
-		$apipost(`ping.php`, {
+		await $apipost(`ping.php`, {
 			id: plusId,
 			service: auth.service,
 			token: token,
@@ -76,7 +76,7 @@ export async function changeProfile(plusId, auth, token, nickname, picture) {
 	if (!plusId || !auth || !token) return null;
 	if (!nickname && !picture) return null;
 	try {
-		$apipost(`profile.php`, {
+		await $apipost(`profile.php`, {
 			id: plusId,
 			service: auth.service,
 			token: token,
@@ -97,7 +97,7 @@ export async function friendRequest(plusId, other, auth, token, decline) {
 			other: other,
 			service: auth.service,
 			token: token,
-			request: decline ? -1 : 0
+			request: decline ? -1 : null
 		});
 		const data = await response.json();
 		return data;

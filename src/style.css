@@ -98,3 +98,56 @@
 	padding: 0.5em;
 	font-family: "Varela Round";
 }
+
+/* Friends */
+.friends-list {
+	display: flex;
+	flex-flow: row;
+	overflow-x: scroll;
+	column-gap: 5px;
+	padding-bottom: 10px;
+}
+
+.friend-card {
+	width: 100px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.friend-plus {
+	text-align: center;
+	width: 90px;
+	height: 90px;
+	background-color: lightgrey;
+	font-size: 4em;
+}
+
+.friend-name {
+	font-size: 0.75em;
+	padding: 5px;
+	width: 90px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	text-align: center;
+}
+
+.friend-status {
+	font-size: 0.6em;
+	width: 100px;
+	text-align: center;
+	color: grey;
+}
+
+.friend-offline {
+	height: 8px;
+	width: 90px;
+	background-color: darkgrey;
+}
+
+.friend-online {
+	height: 8px;
+	width: 90px;
+	background-color: green;
+}
