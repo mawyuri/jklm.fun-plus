@@ -4,4 +4,5 @@ import manifest from './manifest.json';
 
 export default defineConfig({
 	plugins: [crx({ manifest })],
+	build: { minify: false, modulePreload: false }
 });
