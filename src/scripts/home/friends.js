@@ -71,7 +71,7 @@ export function init() {
 		const online = $(card, 'div');
 		const nickname = $(card, '.friend-name');
 		const status = $(card, '.friend-status');
-		const changeStatus = (pf) => {var j=(Math.floor(Date.now() / 1e3) - pf.ping) <= 180; status.innerHTML = `${j && room ? `Playing in <a href="/${DOMPurify.sanitize(room)}">${room}</a>` : (j ? `Browsing rooms` : `Last online ${$rt(pf.ping)}`)}`;};
+		const changeStatus = (pf) => {var j=(Math.floor(Date.now() / 1e3) - pf.ping) <= 180; status.innerHTML = `${j && room ? (`Playing in ${room !== 'a private room' && room !== 'a room' ? `<a href="/${DOMPurify.sanitize(room)}">${room}</a>` : DOMPurify.sanitize(room)}`) : (j ? `Browsing rooms` : `Last online ${$rt(pf.ping)}`)}`;};
 		changeStatus(friend);
 
 		var cardInteractions = $(card, '.friend-interact');

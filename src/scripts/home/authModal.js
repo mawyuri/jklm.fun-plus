@@ -54,6 +54,10 @@ export function init() {
 				<textarea class="auth-modal-chat-area" placeholder="Type here to see how your messages look like in chat"></textarea>
 			</div>
 		</div>
+		<div class="privacy box">
+			<header>Privacy settings</header>
+			<ul class="privacy list"></ul>
+		</div>
 	`);
 
 	const chatlogs = $('.auth-modal-chat-log');
@@ -152,6 +156,34 @@ export function init() {
 
 	updateAuthButtons();
 	authModal.addCallback('close', updateProfile);
+
+	function privacySetting(id, type, defaultValue, optionName) {
+		$set(`chat+privacy:${id}`, defaultValue);
+
+		const settingList = $('.privacy.list');
+		const newSetting = $make('li', settingList);
+		newSetting.insertAdjacentHTML('beforeend', `
+			<input type="${type}" id="${id}Option">
+			<label for="${id}Option">${optionName}</label>
+		`);
+
+		if ($get(`chat+privacy:${id}`, false)) {
+			if (type === 'checkbox') $(`#${id}Option`).checked = $get(`chat+privacy:${id}`) === 'true';
+			else $(`#${id}Option`).value = $get(`chat+privacy:${id}`);
+		} else {
+			if (type === 'checkbox') $(`#${id}Option`).checked = defaultValue;
+			else $(`#${id}Option`).value = defaultValue;
+		}
+
+		$(`#${id}Option`).addEventListener('changed', event => {
+			const optionValue = type === 'checkbox' ? $(`#${id}Option`).checked : $(`#${id}Option`).value;
+			$set(`chat+privacy:${id}`, optionValue);
+		})
+	};
+
+	privacySetting('pingServer', 'checkbox', true, `Let friends know I'm online`);
+	privacySetting('showRoom', 'checkbox', true, `Let friends know what public room I'm in`);
+	privacySetting('lockedRoom', 'checkbox', false, `Let friends know what private room I'm in`);
 
 	$hide('.page.auth');
 	$show('.home');

@@ -35,13 +35,13 @@ export function createModal(id) {
 
 export function openModal(id) {
 	const modal = $(`#${id}`);
-	document.body.style.overflow = 'hidden';
+	document.body.style.overflowY = 'hidden';
 	modal.style.display = 'block';
 }
 
 export function closeModal(id, callback) {
 	const modal = $(`#${id}`);
-	document.body.style.overflow = 'scroll';
+	document.body.style.overflowY = 'scroll';
 	modal.style.display = 'none';
 
 	if (callback)

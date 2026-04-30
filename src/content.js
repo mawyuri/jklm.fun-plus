@@ -1,15 +1,17 @@
-import {$log, $isPlaying} from './features/common.js';
+import { $log, $isPlaying, $waitUntilElement } from './features/common.js';
 import * as api from './features/backend.js';
-import './scripts/ping.js';
 import './style.css';
 
 $log(`JKLM.fun+ Initialized`);
 if ($isPlaying(location)) {
-	// Playing a game
+	$waitUntilElement('a.settings').then(async (element) => {
+		const ping	= await import('./scripts/ping.js');
+	});
 } else {
 	// In lobby/homepage
 	const	authModal	= await import('./scripts/home/authModal.js'),
-			friends		= await import('./scripts/home/friends.js');
+			friends		= await import('./scripts/home/friends.js'),
+			ping		= await import('./scripts/ping.js');
 
 	authModal.init();
 	friends.init();
