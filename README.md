@@ -16,4 +16,7 @@ An extension that aims to improve the social experience, quality-of-life of many
 > [!NOTE]
 > This extension is currently unstable. Bugs will exist, if any was found contact me on Discord (same username) or make open an issue in the repository page.
 
-TBD
+* Download the ZIP file from the [latest release](https://github.com/mawyuri/jklm.fun-plus/releases/latest) (not source code).
+* Extract the ZIP file to a directory, then depending on your browser of choice,
+  - **Chromium**: Go to the extensions page, usually located at `<browser>://extensions`. Enable developer mode and then click on **Load Unpacked**. Navigate to the directory you extracted the ZIP to, make sure it has `manifest.json` inside.
+  - **Firefox**: Go to the addons page at `about:addons`. Click on the gear icon and go to `Debug Add-ons`. There, you should be able to load a temporary add-on. Navigate to the directory you extracted the ZIP to and select the manifest file.
