@@ -5,7 +5,7 @@ import { getPlusId, getFriends, friendRequest } from '../../features/backend.js'
 
 export function init() {
 	const chatLog = $('.log.darkScrollbar');
-	const chatArea = $('.input textarea');
+	const chatArea = $('textarea');
 	const emojiMenu = $('.emojiOptions');
 
 	if (chatArea && socket) {
@@ -14,57 +14,29 @@ export function init() {
 		var currentReply = 0;
 		var isReplying = false;
 		const chatCallback = afterAppendingToChat;
-		afterAppendingToChat = function() {
-			chatCallback();
-			const myId = chatCounter;
-			const message = $('.log > div:last-of-type');
-			message.classList.add('chat-message');
 
-			if ($(message, '.author')) { // Attached to an author, not system
-				message.id = `cid-${chatCounter}`;
-				message.classList.add('chatMessage');
-				chatCounter++;
-
-				const textMessage = $(message, '.text');
-				const replyRegExp = /^\@?(.+): (.+)\n+(.+)$/gm.exec(textMessage.textContent);
-				if (replyRegExp !== null && replyRegExp.length > 0) {
-					message.insertAdjacentHTML('afterbegin', `
-						<span class="chat-reply" style="${$get('partyplus_settings-timestampFormat', 0) == '1' ? 'padding-left: 4.5em;' : ''}">
-						</span>
-					`);
-
-					$(message, '.chat-reply').textContent = `↱ ${replyRegExp[1]}: ${replyRegExp[2]}`;
-					textMessage.textContent = replyRegExp[3];
-				}
-
-				message.addEventListener('dblclick', (event) => {
-					event.preventDefault();
-
-					isReplying = true;
-					currentReply = myId;
-					chatAreaKeyDown({key: '', preventDefault: ()=>{}});
-				})
-			}
-		};
-
+		chatArea.removeEventListener('keydown', onChatTextAreaKeyDown);
 		onChatTextAreaKeyDown = function(e, chat) {
 			if (!e.shiftKey && e.keyCode === 13) {
 				e.preventDefault();
-				const text = chatArea.value.trim();
-				if (text.length > 0){
+				if (chatArea.value.trim().length > 0){
 					socket.emit('chat', chat);
 					isReplying = false;
 					currentReply = 0;
 					chatArea.placeholder = `Type here to chat`;
 
-					if ($('.chatMessage'))
-						$$(`.chatMessage`).forEach(el => el.classList.remove('highlight'));
+					if ($('.chatMessage')){
+						$$(`.chatMessage`).forEach(el =>{
+							el.classList.remove('highlight');
+							el.style.backgroundColor = '';
+						});
+					}
 				}
 				chatArea.value = '';
 			}
 		}
 
-		function chatAreaKeyDown(event) {
+		chatArea.addEventListener('keydown', (event) => {
 			if (!emojiMenu.hidden) {
 				if (event.key === 'ArrowUp') {
 					event.preventDefault();
@@ -94,9 +66,14 @@ export function init() {
 				if (event.key === 'Escape') {
 					event.preventDefault();
 					isReplying = false;
+					currentReply = 0;
 					chatArea.placeholder = `Type here to chat`;
-					if ($('.chatMessage'))
-						$$(`.chatMessage`).forEach(el => el.classList.remove('highlight'));
+					if ($('.chatMessage')){
+						$$(`.chatMessage`).forEach(el => {
+							el.classList.remove('highlight');
+							el.style.cssText = '';
+						});
+					}
 					return;
 				}
 
@@ -132,10 +109,8 @@ export function init() {
 					onChatTextAreaKeyDown(event, chatArea.value.trim());
 				}
 			}
-		}
+		});
 
-		chatArea.removeEventListener('keydown', onChatTextAreaKeyDown);
-		chatArea.addEventListener('keydown', chatAreaKeyDown)
 		chatArea.addEventListener('input', (event) => {
 			const text = chatArea.value;
 			const words = text.split(/\s+/);
@@ -172,6 +147,47 @@ export function init() {
 				}
 			}
 		})
+
+		afterAppendingToChat = function() {
+			chatCallback();
+			$('.newMessages').classList.add('chat-message');
+			const myId = chatCounter;
+			const message = $('.log > div:last-of-type');
+			message.classList.add('chat-message');
+
+			if ($(message, '.author')) { // Attached to an author, not system
+				message.id = `cid-${chatCounter}`;
+				message.classList.add('chatMessage');
+				chatCounter++;
+
+				const textMessage = $(message, '.text');
+				const replyRegExp = /^\@?(.+): (.+)[\n|\r]+(.+)$/gm.exec(textMessage.textContent);
+				if (replyRegExp !== null && replyRegExp.length > 0) {
+					message.insertAdjacentHTML('afterbegin', `
+						<span class="chat-reply" style="${$get('partyplus_settings-timestampFormat', 0) == '1' ? 'padding-left: 4.5em;' : ''}">
+						</span>
+					`);
+
+					$(message, '.chat-reply').textContent = `↱ ${replyRegExp[1]}: ${replyRegExp[2]}`;
+					textMessage.textContent = replyRegExp[3];
+				}
+
+				message.addEventListener('dblclick', (event) => {
+					event.preventDefault();
+
+					isReplying = isReplying ? (!currentReply == myId) : true;
+					currentReply = myId;
+					chatArea.dispatchEvent(new KeyboardEvent('keydown', {
+						key: 'Enter',
+						code: 'Enter',
+						keyCode: 13,
+						which: 13,
+						bubbles: true,
+						cancelable: true
+					}));
+				})
+			}
+		};
 
 		// Socket events
 		const renderProfile = renderViewedUserProfile;
