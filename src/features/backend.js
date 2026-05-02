@@ -1,7 +1,7 @@
 // Backend stuff
 import { $log } from './common.js';
 
-const production = false;
+const production = true;
 const endpoint = production ? `https://mawyuri.alwaysdata.net/` : `http://localhost/jklmplus/`;
 export const $apiget = (a) => fetch(endpoint + a);
 export const $apipost = (a, b) => fetch(endpoint + a, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(b)});
