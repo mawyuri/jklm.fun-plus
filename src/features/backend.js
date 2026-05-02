@@ -1,7 +1,7 @@
 // Backend stuff
 import { $log } from './common.js';
 
-const production = true;
+const production = false;
 const endpoint = production ? `https://mawyuri.alwaysdata.net/` : `http://localhost/jklmplus/`;
 export const $apiget = (a) => fetch(endpoint + a);
 export const $apipost = (a, b) => fetch(endpoint + a, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(b)});
@@ -35,6 +35,8 @@ export async function getFriends(person) {
 	if (!person) return null;
 	try {
 		const response = await $apiget(`friends.php?id=${person}`);
+		if (!response.ok)
+			return null;
 		const data = await response.json();
 		if (data) {
 			return data;
@@ -97,7 +99,7 @@ export async function friendRequest(plusId, other, auth, token, decline) {
 			other: other,
 			service: auth.service,
 			token: token,
-			request: decline ? -1 : null
+			request: decline ? -1 : 0
 		});
 		const data = await response.json();
 		return data;

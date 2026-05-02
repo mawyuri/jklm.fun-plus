@@ -4,7 +4,7 @@ import { plusUserId, discordLogin, twitchLogin } from '../../features/auth.js';
 import * as modal from '../../features/home/modal.js';
 
 export function init() {
-	var { nickname } = settings;
+	var { nickname, picture } = settings;
 	const authModal = modal.createModal('authModal');
 
 	function getUserPictureURL() {
@@ -83,10 +83,21 @@ export function init() {
 	}
 
 	function updateProfile() {
+		var changes = {
+			nickname: null,
+			picture: null
+		}
 		if (nickname !== settings.nickname){
 			nickname = settings.nickname;
-			return changeProfile(plusUserId, settings.auth, $token(), settings.nickname, settings.picture);
+			changes.nickname = settings.nickname;
 		}
+
+		if (picture !== settings.picture){
+			picture = settings.picture;
+			changes.picture = settings.picture;
+		}
+
+		changeProfile(plusUserId, settings.auth, $token(), changes.nickname, changes.picture);
 	}
 
 	const profileForm = $('#jklmp-profile');
@@ -94,9 +105,13 @@ export function init() {
 	const pictureChanged = setupUserPictureFromUrl;
 	setupUserPictureFromUrl = function(url, callback) {
 		pictureChanged(url, callback);
-		updateProfile();
-
-		pictureChanger.src = getUserPictureURL();
+		const pictureInterval = setInterval(() => {
+			if (picture !== settings.picture) {
+				clearInterval(pictureInterval);
+				updateProfile();
+				pictureChanger.src = getUserPictureURL();
+			}
+		}, 100);
 	}
 
 	pictureChanger.addEventListener('click', event => {

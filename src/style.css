@@ -155,3 +155,55 @@ li {
 	width: 90px;
 	background-color: green;
 }
+
+.friend-request-id {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.friend-request-id-input {
+	font-weight:normal;
+	font-size:0.9em;
+	padding:0.1em;
+}
+
+/* Action table */
+.action-row {
+	padding: 5px;
+	dislay: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	row-gap: 3px;
+}
+
+.action-remove {
+	border-color: red;
+	color: red;
+	width: 100%;
+	margin: 4px;
+}
+
+/* chat*/
+.chat-bottom {
+	display: flex;
+	flex-direction: column;
+}
+
+.chat-bottom .chat-message:not(button), .chat-bottom .newMessages:not([hidden]) {
+	margin-top: auto;
+}
+
+.chat-reply {
+	display: inline-block;
+	width: 100%;
+	color: #bbb;
+	font-size: 0.8em;
+	padding-left: 3em;
+}
+
+.mentioner {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}

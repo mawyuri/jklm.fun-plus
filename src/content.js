@@ -1,3 +1,4 @@
+//
 import { $log, $isPlaying, $waitUntilElement } from './features/common.js';
 import * as api from './features/backend.js';
 import './style.css';
@@ -5,7 +6,14 @@ import './style.css';
 $log(`JKLM.fun+ Initialized`);
 if ($isPlaying(location)) {
 	$waitUntilElement('a.settings').then(async (element) => {
-		const ping	= await import('./scripts/ping.js');
+		const 	ping	= await import('./scripts/ping.js'),
+				automod = await import('./scripts/chat/automod.js'),
+				options	= await import('./scripts/chat/options.js'),
+				chat 	= await import('./scripts/chat/chat.js');
+
+		automod.init();
+		options.init();
+		chat.init();
 	});
 } else {
 	// In lobby/homepage

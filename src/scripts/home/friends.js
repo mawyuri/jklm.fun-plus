@@ -1,6 +1,6 @@
 //
 import DOMPurify from 'dompurify';
-import { getFriends, getPerson, friendRequest } from '../../features/backend.js';
+import { createAccount, getFriends, getPerson, friendRequest } from '../../features/backend.js';
 import { plusAuthId, plusUserId } from '../../features/auth.js';
 import { $log, $get, $set, $token, $rt } from '../../features/common.js';
 import * as modal from '../../features/home/modal.js';
@@ -19,16 +19,16 @@ export function init() {
 					<span class="friend-name">Requests</span>
 				</div>` : (!settings.auth
 					? `<span style="font-size:1em;">Link your Discord or Twitch to use this feature.</span>`
-					: `<span style="font-size:1em;">You don't have a JKLM.fun+ account linked to your ${settings.auth.service.charAt(0).toUpperCase() + settings.auth.service.slice(1)} account yet.</span><button id="jklm+" class="styled">Create JKLM.fun+ account</button>`)}
+					: `<span style="font-size:1em;">You don't have a JKLM.fun+ account linked to your ${settings.auth.service.charAt(0).toUpperCase() + settings.auth.service.slice(1)} account yet.</span><button style="margin-left: 10px;" id="jklm+" class="styled">Create JKLM.fun+ account</button>`)}
 			</div>
 		</div>
 	`);
 
 	if ($('#jklm\\+')) {
-		$('#jklm\\+').addEventListener('click', event => {
-			const account = createAccount(settings.auth, plusAuthId, $token(), settings.nickname, settings.picture);
+		$('#jklm\\+').addEventListener('click', async (event) => {
+			const account = await createAccount(settings.auth, plusAuthId, $token(), settings.nickname, settings.picture);
 			if (account.id) {
-				location.refresh(true);
+				location.reload(true);
 			}
 		})
 		return;
@@ -44,18 +44,27 @@ export function init() {
 
 	requestsModal.content.insertAdjacentHTML('beforeend', `
 		<div class="requests box" style="margin-top:1.2em;">
-			<header>Friend requests</header>
-			<div class="friends-list"></div>
+			<header>Incoming requests</header>
+			<div class="friends-list incoming"></div>
+			<header class="friend-request-id" style="column-gap:0.4em;">
+				Outgoing requests
+				<div class="friend-request-id">
+					<input type="number" placeholder="Your ID is ${plusUserId}." class="friend-request-id-input">
+					<button class="styled" style="font-size:0.8em;">Add by ID</button>
+				</div>
+			</header>
+			<div class="friends-list outgoing"></div>
 		</div>
 	`);
 
 	function friendCard(friend) {
 		const isFriend = friend.status === 'friend';
+		const isRecipient = (friend.isRecipient);
 		var lastOnline = Math.floor(Date.now() / 1e3) - friend.ping;
 		var isOnline = lastOnline <= 180;
 		var picture = friend.picture ? `data:image/jpeg;base64,${friend.picture}` : `https://jklm.fun/images/auth/guest.png`;
 		var room = friend.room
-		const card = $make('div', isFriend ? $(friendsList, '.friends-list') : $('.requests .friends-list'));
+		const card = $make('div', isFriend ? $(friendsList, '.friends-list') : $('.friends-list.incoming'));
 		card.classList.add('friend-card');
 		card.insertAdjacentHTML('beforeend', `
 			<img src="${picture}" style="width: 90px; height: auto;">
@@ -71,24 +80,27 @@ export function init() {
 		const online = $(card, 'div');
 		const nickname = $(card, '.friend-name');
 		const status = $(card, '.friend-status');
-		const changeStatus = (pf) => {var j=(Math.floor(Date.now() / 1e3) - pf.ping) <= 180; status.innerHTML = `${j && room ? (`Playing in ${room !== 'a private room' && room !== 'a room' ? `<a href="/${DOMPurify.sanitize(room)}">${room}</a>` : DOMPurify.sanitize(room)}`) : (j ? `Browsing rooms` : `Last online ${$rt(pf.ping)}`)}`;};
+		const changeStatus = (pf) => {var j=(Math.floor(Date.now() / 1e3) - pf.ping) <= 180; status.innerHTML = `${j && pf.room ? (`Playing in ${pf.room !== 'a private room' && pf.room !== 'a room' ? `<a href="/${DOMPurify.sanitize(pf.room)}">${pf.room}</a>` : DOMPurify.sanitize(pf.room)}`) : (j ? `Browsing rooms` : `Last online ${$rt(pf.ping)}`)}`;};
 		changeStatus(friend);
 
 		var cardInteractions = $(card, '.friend-interact');
-		$(cardInteractions, '.decline').addEventListener('click', event => {
-			const data = friendRequest(plusUserId, friend.id, settings.auth, $token(), true);
+		$(cardInteractions, '.decline').addEventListener('click', async (event) => {
+			const data = await friendRequest(plusUserId, friend.id, settings.auth, $token(), true);
 			if (data.status) card.remove();
 		})
 
-		if (!isFriend) {
-			$(cardInteractions).innerHTML = `<a href="#" class="accept">Accept</a> / <a href="#" class="decline">Decline</a>`;
-			$(cardInteractions, '.accept').addEventListener('click', event => {
-				const data = friendRequest(plusUserId, friendFetch.id, settings.auth, $token());
+		if (!isFriend && isRecipient) {
+			cardInteractions.innerHTML = `<a href="#" class="accept">Accept</a> / <a href="#" class="decline">Decline</a>`;
+			$(cardInteractions, '.accept').addEventListener('click', async (event) => {
+				const data = await friendRequest(plusUserId, friend.id, settings.auth, $token());
 				if (data.status) {
-					$('.friends-list').appendChild(card);
-					$(cardInteractions).innerHTML = `<a href="#" class="decline">Unfriend</a>`;
+					$('.friends .friends-list').appendChild(card);
+					cardInteractions.innerHTML = `<a href="#" class="decline">Unfriend</a>`;
 				}
 			})
+		} else if (!isFriend && !isRecipient) {
+			$(cardInteractions, '.decline').textContent = `Cancel`;
+			$('.friends-list.outgoing').appendChild(card);
 		}
 
 		const fetchInterval = setInterval(async () => {
@@ -107,8 +119,31 @@ export function init() {
 		}, 90 * 1e3);
 	}
 
+	const requestInput = $('.friend-request-id-input');
+	const requestButton = $('.friend-request-id > button');
+	requestButton.addEventListener('click', async (event) => {
+		const friendId = Number(requestInput.value);
+
+		try {
+			const data = await friendRequest(plusUserId, friendId, settings.auth, $token());
+			if (data) {
+				if (data.status === 'success') {
+					const profile = await getPerson(friendId);
+					friendCard({
+						status: 'pending',
+						isRecipient: false,
+						ping: profile.ping,
+						picture: profile.picture,
+						nickname: profile.nickname,
+						room: profile.room
+					});
+				}
+			}
+		} catch (e) {}
+	})
+
 	getFriends(plusUserId).then(friendList => {
-		if (friendList) {
+		if (friendList.length) {
 			friendList.forEach(friend => {
 				friendCard(friend);
 			})

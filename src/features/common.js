@@ -42,3 +42,5 @@ export async function $waitUntilElement(selector, b) {
 		observer.observe(doc.body, {childList: true, subtree: true})
 	})
 }
+
+export const $rules = $get('chat+automod') ? JSON.parse($get('chat+automod')) : null;
