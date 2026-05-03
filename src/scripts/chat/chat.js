@@ -38,7 +38,7 @@ export function init() {
 
 		emojiMenu.hidden = true;
 		chatArea.addEventListener('keydown', (event) => {
-			if (!emojiMenu.hidden) {
+			if (!emojiMenu.hidden && emojiMenu) {
 				if (event.key === 'ArrowUp') {
 					event.preventDefault();
 					currentEmoji--;
@@ -52,14 +52,14 @@ export function init() {
 				if (currentEmoji < 0) currentEmoji = emojiMenu.children.length - 1;
 				if (currentEmoji > emojiMenu.children.length - 1) currentEmoji = 0;
 
-				if (emojiMenu.children.length){
-					emojiMenu.children.forEach(el => el.style.backgroundColor = 'rgba(0,0,0,0)');
+				if (emojiMenu.children.length > 0){
+					Array.from(emojiMenu.children).forEach(el => el.style.backgroundColor = 'rgba(0,0,0,0)');
 					emojiMenu.children[currentEmoji].style.backgroundColor = 'rgba(0,0,0,0.5)';
 				}
 
 				if (event.key === 'Enter') {
 					event.preventDefault();
-					emojiMenu.children[currentEmoji].click();
+					if (emojiMenu.children.length > 0) emojiMenu.children[currentEmoji].click();
 				}
 			}
 			else {

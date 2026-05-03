@@ -1,5 +1,5 @@
 // Common Shit.
-export const $version = '1.0.2.2';
+export const $version = '1.0.2.3';
 
 export const win = window;
 export const doc = document;
@@ -45,4 +45,7 @@ export async function $waitUntilElement(selector, b) {
 	})
 }
 
-export const $rules = $get('chat+automod') ? JSON.parse($get('chat+automod')) : null;
+export var $rules = $get('chat+automod') ? JSON.parse($get('chat+automod')) : null;
+export function $refreshRules() {
+	$rules = $get('chat+automod') ? JSON.parse($get('chat+automod')) : null
+};

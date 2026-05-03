@@ -30,12 +30,6 @@ export function actionTable(field, name) {
 	table.classList.add('actionTable');
 	table.style.backgroundColor = 'rgba(0,0,0,.5)';
 
-	var addChild = $make('button', table);
-	addChild.id = 'addchild';
-	addChild.style.color = 'white';
-	addChild.style.width = '100%';
-	addChild.innerText = '+';
-
 	actionArray.actionRow = function(preset, values, updateCallback, removeCallback) {
 		var row = $make('div', table);
 		row.classList.add('action-row');
@@ -91,14 +85,8 @@ export function actionTable(field, name) {
 		$$(row, 'select, input').forEach(element => element.onchange = update);
 		$(row, '.action-remove').addEventListener('click', () => {
 			row.remove();
-			if (!(condition.value === 'Condition' || parameter.value === '' || outcome.value === 'Outcome'))
-				removeCallback();
-		})
-
-		table.append(addChild);
-		addChild.onclick = () => {
-			actionArray.actionRow(preset, null, updateCallback, removeCallback);
-		}
+			removeCallback();
+		});
 	}
 
 	actionArray.table = {};
@@ -109,6 +97,8 @@ export function actionTable(field, name) {
 export function createRule(id, {c: condition, i: input, o: outcome}) {
 	removeRule(id);
 
+	if (input == false) return;
+
 	let listener;
 	if (condition === 'name') {
 		listener = (data) => {
@@ -116,6 +106,9 @@ export function createRule(id, {c: condition, i: input, o: outcome}) {
 				actionExecute(outcome, data.peerId);
 		}
 		socket.on('chatterAdded', listener);
+		socket.emit('getChatterProfiles', (profiles) => {
+			profiles.forEach(p => {if (!p.roles.includes('banned')) listener(p)});
+		});
 	}
 	else if (condition === 'twitch' || condition === 'discord') {
 		listener = (data) => {
@@ -124,6 +117,9 @@ export function createRule(id, {c: condition, i: input, o: outcome}) {
 			}
 		}
 		socket.on('chatterAdded', listener);
+		socket.emit('getChatterProfiles', (profiles) => {
+			profiles.forEach(p => {if (!p.roles.includes('banned')) listener(p)});
+		});
 	}
 	else if (condition === 'chat') {
 		listener = (profile, text) => {
