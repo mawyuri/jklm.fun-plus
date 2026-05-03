@@ -131,7 +131,7 @@ export function init() {
 							<img class="picture square" style="width: 10%;" src="${user.picture ? 'data:image/jpeg;base64,' + user.picture : 'https://jklm.fun/images/auth/guest.png'}">
 							<span>@${user.nickname}</span>
 						</span>
-					`);
+					`).join('\n');
 
 					emojiMenu.hidden = false;
 					emojiMenu.style.display = '';
