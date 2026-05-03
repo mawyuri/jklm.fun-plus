@@ -190,11 +190,11 @@ li {
 	flex-direction: column;
 }
 
-.chat-message ~ .chat-message {
+.chat-message:not([hidden]) ~ .chat-message:not([hidden]) {
 	margin-top: 0 !important;
 }
 
-.chat-bottom .chat-message:not(button), .chat-bottom {
+.chat-bottom .chat-message:not(button):not([hidden]), .chat-bottom {
 	margin-top: auto;
 }
 

@@ -1,5 +1,5 @@
 //
-import { $log, $isPlaying, $waitUntilElement } from './features/common.js';
+import { $version, $log, $isPlaying, $waitUntilElement } from './features/common.js';
 import * as api from './features/backend.js';
 import './style.css';
 
@@ -32,4 +32,15 @@ if ($isPlaying(location)) {
 		</span>
 	`);
 	$('h1>a').textContent += '+';
+
+	fetch('https://api.github.com/repos/mawyuri/jklm.fun-plus/releases/latest').then(response => response.json())
+	.then(data => {
+		if (data) {
+			if (data.tag_name !== $version) {
+				$('.friends').insertAdjacentHTML('afterend', `
+					<div class="enjoyJklm">➕ Your version of JKLM.fun+ might be outdated. <a href="https://github.com/mawyuri/jklm.fun-plus/releases/latest">Install</a> the latest version for a more stable experience.</div>
+				`);
+			}
+		}
+	})
 }

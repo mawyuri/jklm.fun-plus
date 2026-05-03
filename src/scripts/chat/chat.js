@@ -36,6 +36,7 @@ export function init() {
 			}
 		}
 
+		emojiMenu.hidden = true;
 		chatArea.addEventListener('keydown', (event) => {
 			if (!emojiMenu.hidden) {
 				if (event.key === 'ArrowUp') {
@@ -150,7 +151,8 @@ export function init() {
 
 		afterAppendingToChat = function() {
 			chatCallback();
-			$('.newMessages').classList.add('chat-message');
+			if ($('.newMessages'))
+				$('.newMessages').classList.add('chat-message');
 			const myId = chatCounter;
 			const message = $('.log > div:last-of-type');
 			message.classList.add('chat-message');
@@ -188,6 +190,11 @@ export function init() {
 				})
 			}
 		};
+
+		if ($$('div[class=""], div[class="system"], div[class="highlight"]')) {
+			// Loaded before initialization
+			$$('div[class=""], div[class="system"], div[class="highlight"]').forEach(e => e.remove());
+		}
 
 		// Socket events
 		const renderProfile = renderViewedUserProfile;
