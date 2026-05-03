@@ -84,7 +84,7 @@ li {
 	height: 9em;
 	font-size: 0.8em;
 	padding: 1em;
-	overflow: scroll;
+	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
 	row-gap: 0.4375em;
@@ -107,7 +107,7 @@ li {
 .friends-list {
 	display: flex;
 	flex-flow: row;
-	overflow-x: scroll;
+	overflow-x: auto;
 	column-gap: 5px;
 	padding-bottom: 10px;
 }
