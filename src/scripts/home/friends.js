@@ -1,7 +1,7 @@
 //
 import DOMPurify from 'dompurify';
 import { createAccount, getFriends, getPerson, friendRequest } from '../../features/backend.js';
-import { plusAuthId, plusUserId } from '../../features/auth.js';
+import { plusAuthId, plusUserId, discordLogin, twitchLogin } from '../../features/auth.js';
 import { $log, $get, $set, $token, $rt } from '../../features/common.js';
 import * as modal from '../../features/home/modal.js';
 
@@ -26,6 +26,18 @@ export function init() {
 
 	if ($('#jklm\\+')) {
 		$('#jklm\\+').addEventListener('click', async (event) => {
+			if (!plusAuthId) {
+				if (settings.auth) {
+					if (settings.auth.service === 'discord'){
+						await discordLogin();
+					}
+
+					if (settings.auth.service === 'twitch'){
+						await twitchLogin();
+					}
+				}
+			}
+
 			const account = await createAccount(settings.auth, plusAuthId, $token(), settings.nickname, settings.picture);
 			if (account.id) {
 				location.reload(true);

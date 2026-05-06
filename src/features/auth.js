@@ -19,12 +19,13 @@ export async function discordLogin() {
 			try {
 				if (discordWindow.location.href.includes('access_token')) {
 					clearInterval(tokenCheck);
-					const params = new URLSearchParams(twitchWindow.location.hash.slice(1));
+					const params = new URLSearchParams(discordWindow.location.hash.slice(1));
 					const token = params.get(`access_token`);
-					twitchWindow.close();
+					discordWindow.close();
 
 					const user = await checkAuth(`https://discord.com/api/users/@me`, token);
-					plusAuthId = $set(`chat+id`, user.id);
+					plusAuthId = user.id;
+					$set(`chat+id`, user.id);
 
 					resolve({
 						expiration: Date.now() + 7 * 24 * 3600 * 1000,

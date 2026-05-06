@@ -1,5 +1,5 @@
 // Common Shit.
-export const $version = '1.0.3';
+export const $version = '1.0.3.1';
 
 export const win = window;
 export const doc = document;
