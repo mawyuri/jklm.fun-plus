@@ -7,9 +7,10 @@ An extension that aims to improve the social experience, quality-of-life of many
 - [x] Friends system
 - [x] Faster authentication
 - [x] Automoderation in chats
-- [x] Embedding media links sent in chat
+- [ ] Embedding media links sent in chat
 - [x] Joining friends' game
 - [x] Privacy settings
+- [x] Chat translation
 - Suggest anything over at the issues page or contact me on Discord (same username.)
 
 ## Installation
