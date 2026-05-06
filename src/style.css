@@ -211,3 +211,12 @@ li {
 	align-items: center;
 	gap: 0.5em;
 }
+
+.chat-translate {
+	border: none;
+	outline: none;
+	background: none;
+	color: grey;
+	position: relative;
+	left: 5px;
+}
