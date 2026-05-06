@@ -66,9 +66,10 @@ export function init() {
 				i: `/${viewedUserProfile.auth.id}(@${viewedUserProfile.auth.username})?/`,
 				o: 'moderate'
 			};
-			createRow($rules.length, data);
-			automod.createRule($rules.length, data);
+			$rules.push(data);
 			$set('chat+automod', JSON.stringify($rules));
+			$refreshRules();
+			render();
 		}
 	});
 }
