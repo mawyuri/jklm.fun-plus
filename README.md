@@ -7,10 +7,14 @@ An extension that aims to improve the social experience, quality-of-life of many
 - [x] Friends system
 - [x] Faster authentication
 - [x] Automoderation in chats
-- [ ] Embedding media links sent in chat
+- [X] Embedding media links sent in chat (supports catbox.moe and frisk.page)
+- [X] Upload media to chat
+- [X] Right click chat messages for quick actions
 - [x] Joining friends' game
 - [x] Privacy settings
 - [x] Chat translation
+- [X] Custom keybind for hyphens (💣 BombParty)
+- [ ] Using GIFs
 - Suggest anything over at the issues page or contact me on Discord (same username.)
 
 ## Installation
@@ -19,5 +23,7 @@ An extension that aims to improve the social experience, quality-of-life of many
 
 * Download the ZIP file from the [latest release](https://github.com/mawyuri/jklm.fun-plus/releases/latest) (not source code).
 * Extract the ZIP file to a directory, then depending on your browser of choice,
-  - **Chromium**: Go to the extensions page, usually located at `<browser>://extensions`. Enable developer mode and then click on **Load Unpacked**. Navigate to the directory you extracted the ZIP to, make sure it has `manifest.json` inside.
+  - **Chromium**:
+      - Go to the extensions page located at `about:extensions`. Enable developer mode and then click on **Load Unpacked**. Navigate to the directory you extracted the ZIP to, make sure it has `manifest.json` inside.
+      - **Alternative method**: Go to the extensions page located at `about:extensions`. Enable developer mode and drag the downloaded ZIP file on to the page.
   - **Firefox**: Go to the addons page at `about:addons`. Click on the gear icon and go to `Debug Add-ons`. There, you should be able to load a temporary add-on. Navigate to the directory you extracted the ZIP to and select the manifest file.
