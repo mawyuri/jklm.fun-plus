@@ -155,7 +155,8 @@ export function init() {
 						deathButton.classList.add('upload-delete');
 						deathButton.addEventListener('click', () => {
 							queueElement.remove();
-							queueElements[index] = null;
+							if (queueElements[index] != null)
+								queueElements[index] = null;
 							uploadQueue[index] = null;
 						})
 
@@ -191,10 +192,11 @@ export function init() {
 				if (chatArea.value.trim().length > 0 || uploadQueue.length > 0) {
 					if (uploadQueue.length > 0) {
 						for (let i = 0; i < uploadQueue.length; i++) {
-							console.log(uploadQueue.length);
 							if (typeof(uploadQueue[i]) !== 'string') continue;
 							chat += ' ' + uploadQueue[i];
-							queueElements[i].remove();
+							uploadQueue[i] = null;
+							if (queueElements[i] != null)
+								queueElements[i].remove();
 							queueElements[i] = null;
 						}
 
