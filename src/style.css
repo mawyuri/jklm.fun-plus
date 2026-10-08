@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+
 .square {
 	height: auto;
 }
@@ -219,4 +221,136 @@ li {
 	color: grey;
 	position: relative;
 	left: 5px;
+}
+
+/* right click context */
+.ctx-menu {
+	width: 6em;
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	overflow: hidden;
+}
+
+.ctx-menu > :nth-child(1) {
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+	padding-top: .4em;
+}
+
+.ctx-menu > :last-child {
+	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 8px;
+	padding-bottom: .4em;
+}
+
+.ctx-menu > * {
+	font-size: 0.8em;
+	text-align: left;
+	color: #e8e6e3;
+	border-color: #736b5e;
+	background-color: #181a1b;
+	padding-left: 12px;
+	padding-top: .25em;
+	padding-bottom: .25em;
+	border: none;
+	cursor: default;
+}
+
+.ctx-menu > span {}
+
+.ctx-menu > *:hover {
+	background-color: #2a2a2a;
+}
+
+.material-symbols-outlined {
+	font-size: 15px;
+}
+
+.red {
+	color: red;
+}
+
+/* attachment/chatbar */
+.attachment-bar {
+	height: 1.5em;
+	background: rgba(0, 0, 0, 0.4);
+	display: flex;
+	gap: 5px;
+	color: white;
+	padding-left: 5px;
+}
+
+.emojiOptions {
+	max-height: 400px;
+	overflow-y: auto;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	right: 0px;
+	z-index: 999;
+	background: #131313;
+	color: white;
+}
+
+.sidebar > .chat .input {
+	display: flex;
+	height: 4.5em;
+	flex-direction: column;
+}
+
+.attachment-button {
+	background: none;
+	border: none;
+	color: rgba(255, 255, 255, 0.4);
+}
+
+.active {
+	background: none;
+	border: none;
+	color: white;
+}
+
+.attachment-select {
+	background: none;
+	border: none;
+	color: #eee;
+	cursor: default;
+	font-size: 0.7em;
+}
+
+.attachment-image {
+	width: 20%;
+	height: auto;
+	background-size: cover;
+	display: grid;
+	place-items: center;
+}
+
+.upload-container {
+	width: auto;
+	min-width: 50px;
+	max-width: 120px;
+	max-height: 50px;
+}
+
+.upload-delete {
+	position: absolute;
+	margin-top: -5px;
+	color:red;
+	background: none;
+	border: none;
+}
+
+.uploaded-img {
+	height: 100%;
+	width:100%;
+	object-fit: contain;
+}
+
+.attachment-chat {
+	max-height: 125px;
+	width: auto;
+	padding-top: 10px;
 }

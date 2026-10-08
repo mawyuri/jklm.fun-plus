@@ -1,6 +1,6 @@
 // Authentication with Discord and Twitch
 import { checkAuth, getPlusId } from './backend.js';
-import { $log, $get, $set } from './common.js';
+import { $get, $set } from './common.js';
 export var plusAuthId = $get('chat+id', null);
 export var plusUserId = -1;
 

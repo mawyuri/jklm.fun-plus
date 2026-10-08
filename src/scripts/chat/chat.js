@@ -2,25 +2,208 @@
 import { $log, $get, $set, $token } from '../../features/common.js';
 import { plusAuthId, plusUserId } from '../../features/auth.js';
 import { getPlusId, getFriends, friendRequest } from '../../features/backend.js';
-import { languages } from '../../features/languages.js';
+import { createContextContainer, contextMenu } from '../../features/chat/context.js';
+import { attachmentBar, attachmentButton, attachmentSelect } from '../../features/chat/chatbar.js';
 
 export function init() {
 	const chatLog = $('.log.darkScrollbar');
 	const chatArea = $('textarea');
 	const emojiMenu = $('.emojiOptions');
 
+	const fetchCallbacks = new Map();
+	const uploadCallbacks = new Map();
+	window.addEventListener('message', (e) => {
+		const { id, response } = e.data;
+		if (!response) return;
+
+		if (fetchCallbacks.has(id)) {
+			const callback = fetchCallbacks.get(id);
+
+			const mockResponse = {
+				status: response.status,
+				headers: {
+					get: (key) => response.headers[key.toLowerCase()]
+				},
+				text: () => {
+					if (response.dataType === 'json') return Promise.resolve(JSON.stringify(response.body));
+					return Promise.resolve(response.body);
+				},
+				json: () => {
+					if (response.dataType === 'text') return Promise.resolve(JSON.parse(response.body));
+					return Promise.resolve(response.body);
+				},
+				blob: () => {
+					if (response.dataType === 'binary') {
+						const uint8 = new Uint8Array(response.body);
+						const contentType = response.headers['content-type'] || 'application/octet-stream';
+						return Promise.resolve(new Blob([uint8], { type: contentType }));
+					}
+					throw new Error("Response was not fetched as binary");
+				},
+				arrayBuffer: () => {
+					if (response.dataType === 'binary') {
+						const uint8 = new Uint8Array(response.body);
+						return Promise.resolve(uint8.buffer);
+					}
+					throw new Error("Response was not fetched as binary");
+				}
+			};
+
+			callback(mockResponse);
+			fetchCallbacks.delete(id);
+		}
+		else if (e.data.type === 'CRX_FileUpload_Response') {
+			const { id, response } = e.data;
+
+			if (uploadCallbacks.has(id)) {
+				const callback = uploadCallbacks.get(id);
+				callback(response);
+				uploadCallbacks.delete(id);
+			}
+		}
+	});
+
+	function newId() {
+		return Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
+	}
+
 	if (chatArea && socket) {
+		socket.on('setGame', () => {$('iframe').src += '?'});
+
+		const chatbar = attachmentBar('main');
+		const uploadBar = attachmentBar('uploads');
+		uploadBar.style.display = 'none';
+		uploadBar.style.height = '3.5em';
+		uploadBar.style.overflowX = 'scroll';
+		chatLog.after(uploadBar);
+
+		const uploadQueue = new Array();
+		const queueElements = new Array();
+		uploadQueue.clear = function() {
+			let writeIndex = 0;
+			for (let i = 0; i < uploadQueue.length; i++) {
+				if (uploadQueue[i] !== null) {
+					uploadQueue[writeIndex] = uploadQueue[i];
+					writeIndex++;
+				}
+			}
+			uploadQueue.length = writeIndex;
+		}
+
+		uploadQueue.update = function() {
+			if (uploadQueue.length > 0) {
+				uploadBar.style.display = '';
+				for (const [index, url] of uploadQueue.entries()) {
+					if (typeof(url) !== 'string') continue;
+
+					if (queueElements[index]) {
+						const queueElement = queueElements[index];
+						queueElement.style = '';
+					}
+				}
+			} else {
+				uploadBar.style.display = 'none';
+				uploadBar.replaceChildren();
+			}
+		}
+
+		const uploadButton = attachmentButton('add_circle', chatbar);
+		uploadButton.callback(() => {
+			uploadButton.activate();
+
+			const fileInput = $make('input');
+			const allowedTypes = ['image/*', 'video/*'];
+			fileInput.accept = '' + allowedTypes.join(',');
+			fileInput.type = 'file';
+			fileInput.click();
+
+			fileInput.addEventListener('change', async (event) => {
+				const files = fileInput.files;
+				const uploadUrl = $get('chat+uploader', 'https://catbox.moe/user/api.php');
+
+				const uploadPromises = Array.from(files).map(async (file) => {
+					if (!allowedTypes.some(type => file.type.match(type))) {
+						alert(`File type not allowed: ${file.type}`);
+						return;
+					}
+
+					const index = uploadQueue.length;
+					const arrayBuffer = await file.arrayBuffer();
+					const blob = new Blob([arrayBuffer], { type: file.type });
+					const uploadId = newId();
+					const detail = {
+						id: uploadId,
+						fileName: file.name,
+						fileType: file.type,
+						fileData: Array.from(new Uint8Array(arrayBuffer)),
+						domain: uploadUrl
+					}
+
+					uploadCallbacks.set(uploadId, function(response) {
+						const data = response.data;
+						if (uploadUrl.includes('catbox.moe')) {
+							uploadQueue[index] = data;
+						} else {
+							uploadQueue[index] = data.file_url;
+						}
+
+						queueElements[index] = $make('div', uploadBar);
+						const queueElement = queueElements[index];
+						queueElement.classList.add("upload-container");
+						
+						const deathButton = $make('button', queueElement);
+						deathButton.classList.add('upload-delete');
+						deathButton.addEventListener('click', () => {
+							queueElement.remove();
+							queueElements[index] = null;
+							uploadQueue[index] = null;
+						})
+
+						const queueImage = $make('img', queueElement);
+						queueImage.classList.add("uploaded-img");
+						queueImage.src = uploadQueue[index];
+						uploadQueue.update();
+					});
+
+					uploadQueue[index] = URL.createObjectURL(blob);
+			  		window.postMessage({type: 'CRX_FileUpload', detail: detail}, '*');
+	  			});
+
+	  			Promise.all(uploadPromises).then((results) => {
+					results.forEach((result) => {
+						uploadButton.deactivate();
+					});
+				});
+			})
+		});
+
 		var chatCounter = 0;
 		var currentEmoji = 0;
 		var currentReply = 0;
 		var isReplying = false;
 		const chatCallback = afterAppendingToChat;
+		createContextContainer();
 
 		chatArea.removeEventListener('keydown', onChatTextAreaKeyDown);
 		onChatTextAreaKeyDown = function(e, chat) {
 			if (!e.shiftKey && e.keyCode === 13) {
 				e.preventDefault();
-				if (chatArea.value.trim().length > 0){
+				if (chatArea.value.trim().length > 0 || uploadQueue.length > 0) {
+					if (uploadQueue.length > 0) {
+						for (let i = 0; i < uploadQueue.length; i++) {
+							console.log(uploadQueue.length);
+							if (typeof(uploadQueue[i]) !== 'string') continue;
+							chat += ' ' + uploadQueue[i];
+							queueElements[i].remove();
+							queueElements[i] = null;
+						}
+
+						uploadQueue.clear();
+						uploadQueue.update();
+						uploadBar.replaceChildren();
+						uploadBar.style.display = 'none';
+					}
+
 					socket.emit('chat', chat);
 					isReplying = false;
 					currentReply = 0;
@@ -39,7 +222,9 @@ export function init() {
 
 		emojiMenu.hidden = true;
 		chatArea.addEventListener('keydown', (event) => {
-			if (!emojiMenu.hidden && emojiMenu) {
+			if (emojiMenu && !emojiMenu.hidden && emojiMenu.children.length > 0) {
+				emojiMenu.style.bottom = '4.5em';
+
 				if (event.key === 'ArrowUp') {
 					event.preventDefault();
 					currentEmoji--;
@@ -155,7 +340,7 @@ export function init() {
 			if ($('.newMessages'))
 				$('.newMessages').classList.add('chat-message');
 			const myId = chatCounter;
-			const message = $('.log > div:last-of-type');
+			const message = $('.log > div:not(.chatMessage):not(.chat-message)');
 			message.classList.add('chat-message');
 
 			if ($(message, '.author')) { // Attached to an author, not system
@@ -163,8 +348,11 @@ export function init() {
 				message.classList.add('chatMessage');
 				chatCounter++;
 
+				const messageAuthor = +$(message, '.author').dataset.peerId;
 				const textMessage = $(message, '.text');
-				const replyRegExp = /^\@?(.+): (.+)[\n|\r]+(.+)$/gm.exec(textMessage.textContent);
+				var originalText = textMessage.textContent;
+				var translatedText = null;
+				const replyRegExp = /^\@?(.+): ([^:]+)[\n|\r]+([^:]+)$/gm.exec(textMessage.textContent);
 				if (replyRegExp !== null && replyRegExp.length > 0) {
 					message.insertAdjacentHTML('afterbegin', `
 						<span class="chat-reply" style="${$get('partyplus_settings-timestampFormat', 0) == '1' ? 'padding-left: 4.5em;' : ''}">
@@ -172,54 +360,148 @@ export function init() {
 					`);
 
 					$(message, '.chat-reply').textContent = `↱ ${replyRegExp[1]}: ${replyRegExp[2]}`;
-					textMessage.textContent = replyRegExp[3];
+					textMessage.innerHTML = linkifyText(replyRegExp[3]);
+					originalText = textMessage.textContent;
 				}
 
-				message.addEventListener('dblclick', (event) => {
-					event.preventDefault();
+				const links = $$(textMessage, 'a');
+				for (const [index, link] of links.entries()) {
+					const fetchId = newId();
+					fetchCallbacks.set(fetchId, function(response) {
+						const fileType = response.headers.get('content-type');
+						if (fileType.startsWith('video')) {
+							const videoElement = $make('video');
+							const sourceElement = $make('source', videoElement);
+							sourceElement.src = links[index].href;
+							sourceElement.type = fileType;
 
-					isReplying = isReplying ? (!currentReply == myId) : true;
-					currentReply = myId;
-					chatArea.dispatchEvent(new KeyboardEvent('keydown', {
+							videoElement.classList.add("attachment-chat");
+							videoElement.controls = true;
+							links[index].remove();
+
+							message.append(videoElement);
+							videoElement.before($make('br'));
+						}
+						else if (fileType.startsWith('image')) {
+							const imageElement = $make('img');
+							imageElement.src = links[index].href;
+							imageElement.classList.add("attachment-chat");
+							links[index].remove();
+
+							message.append(imageElement);
+							imageElement.before($make('br'));
+						}
+					})
+
+					window.postMessage({type: 'CRX_Fetch', detail: {
+						id: fetchId,
+						domain: link.href.replace("http://", "https://"),
+						options: null
+					}}, '*');
+				}
+
+				function replyToMessage(id) {
+					isReplying = isReplying ? (!currentReply == id) : true;
+					currentReply = id;
+					/* chatArea.dispatchEvent(new KeyboardEvent('keydown', {
 						key: 'Enter',
 						code: 'Enter',
 						keyCode: 13,
 						which: 13,
 						bubbles: true,
 						cancelable: true
-					}));
+					})); */
+				}
+
+				message.addEventListener('contextmenu', () => {
+					const contextItems = [
+						(true) ? {
+							id: 'copy',
+							icon: 'content_copy',
+							text: 'Copy',
+							color: 'white',
+							callback: () => {
+								navigator.clipboard.writeText(textMessage.textContent);
+							}
+						} : null,
+
+						(true) ? {
+							id: 'reply',
+							icon: 'reply',
+							text: 'Reply',
+							color: 'white',
+							callback: () => {
+								replyToMessage(myId);
+							}
+						} : null,
+
+						(true) ? {
+							id: 'trans',
+							icon: 'translate',
+							text: originalText === textMessage.textContent ? 'Translate' : 'View original',
+							color: 'white',
+							callback: () => {
+								if (originalText !== textMessage.textContent) {
+									textMessage.textContent = originalText;
+									textMessage.style.fontStyle = 'normal';
+									return;
+								}
+
+								if (translatedText != null) {
+									textMessage.textContent = translatedText;
+									textMessage.style.fontStyle = 'italic';
+									return;
+								}
+
+								fetch(`https://translate-pa.googleapis.com/v1/translate?params.client=gtx&dataTypes=TRANSLATION&key=AIzaSyDLEeFI5OtFBwYBIoK_jj5m32rZK5CkCXA&query.sourceLanguage=auto&query.targetLanguage=${$get('chat+transLang', 'en')}&query.text=${textMessage.textContent}`)
+								.then(r => r.json())
+								.then(response => {
+									if (response.translation.toLowerCase() == textMessage.textContent.toLowerCase()) return;
+									translatedText = response.translation;
+									textMessage.textContent = translatedText;
+									textMessage.style.fontStyle = 'italic';
+								})
+							}
+						} : null,
+
+						(selfRoles.includes('leader') || selfRoles.includes('moderator')) ? {
+							id: 'm-kick',
+							icon: 'person_remove',
+							text: 'Kick',
+							color: 'red',
+							callback: () => {
+								socket.emitWithAck('setUserBanned', messageAuthor, true);
+								socket.emitWithAck('setUserBanned', messageAuthor, false);
+							}
+						} : null,
+
+						(selfRoles.includes('leader') || selfRoles.includes('moderator')) ? {
+							id: 'm-ban',
+							icon: 'block',
+							text: 'Ban',
+							color: 'red',
+							callback: () => {
+								socket.emitWithAck('setUserBanned', messageAuthor, true);
+							}
+						} : null,
+					];
+
+					contextMenu(event, contextItems);
 				});
 
-				const originalText = textMessage.textContent;
-				fetch(`https://translate-pa.googleapis.com/v1/translate?params.client=gtx&dataTypes=TRANSLATION&key=AIzaSyDLEeFI5OtFBwYBIoK_jj5m32rZK5CkCXA&query.sourceLanguage=auto&query.targetLanguage=${$get('chat+transLang', 'en')}&query.text=${textMessage.textContent}`)
-				.then(r => r.json())
-				.then(response => {
-					if (response.translation.toLowerCase() == textMessage.textContent.toLowerCase()) return;
-					if (response.detectedLanguages.srclang != $get('chat+transLang', 'en')) {
-						var transButton = $make('button');
-						transButton.classList.add('chat-translate');
-						transButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-translate" viewBox="0 0 16 16"><path d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286zm1.634-.736L5.5 3.956h-.049l-.679 2.022z"></path><path d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zm7.138 9.995q.289.451.63.846c-.748.575-1.673 1.001-2.768 1.292.178.217.451.635.555.867 1.125-.359 2.08-.844 2.886-1.494.777.665 1.739 1.165 2.93 1.472.133-.254.414-.673.629-.89-1.125-.253-2.057-.694-2.82-1.284.681-.747 1.222-1.651 1.621-2.757H14V8h-3v1.047h.765c-.318.844-.74 1.546-1.272 2.13a6 6 0 0 1-.415-.492 2 2 0 0 1-.94.31"></path></svg>'
-						textMessage.after(transButton);
-
-						transButton.addEventListener('click', () => {
-							if (textMessage.textContent == originalText) {
-								textMessage.textContent = response.translation;
-								textMessage.style.fontStyle = 'italic';
-							}
-
-							else {
-								textMessage.textContent = originalText;
-								textMessage.style.fontStyle = 'normal';
-							}
-						});
-					}
-				})
+				message.addEventListener('dblclick', (event) => {
+					event.preventDefault();
+					replyToMessage(myId);
+				});
 			}
 		};
 
-		if ($$('div[class=""], div[class="system"], div[class="highlight"]')) {
-			// Loaded before initialization
-			$$('div[class=""], div[class="system"], div[class="highlight"]').forEach(e => e.remove());
+		if ($$('.log > div:not(.chatMessage):not(.chat-message)')) {
+			$$('.log > div:not(.chatMessage):not(.chat-message)').forEach(e => {
+				if ($(e, 'span.text')) {
+					afterAppendingToChat();
+				}
+			});
 		}
 
 		// Socket events
@@ -289,6 +571,6 @@ export function init() {
 					}
 				})
 			}
-		}
+		};
 	}
 }

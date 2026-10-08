@@ -1,10 +1,10 @@
 //
-import { $version, $log, $isPlaying, $waitUntilElement } from './features/common.js';
+import { $version, $log, $isPlaying, $waitUntilElement, $get, $set } from './features/common.js';
 import * as api from './features/backend.js';
 import './style.css';
 
 $log(`JKLM.fun+ Initialized`);
-if ($isPlaying(location)) {
+if ($isPlaying(location) && location.host === 'jklm.fun') {
 	$waitUntilElement('a.settings').then(async (element) => {
 		const 	ping	= await import('./scripts/ping.js'),
 				automod = await import('./scripts/chat/automod.js'),
@@ -14,7 +14,48 @@ if ($isPlaying(location)) {
 		automod.init();
 		options.init();
 		chat.init();
+		gameWindow.postMessage({name: 'jklm.fun+'}, '*')
 	});
+} else if (location.host.match(/(phoenix|falcon)/i)) {
+	if (location.pathname.includes("bombparty")) {
+		// Bombparty
+		parentWindow.postMessage({name: 'gameInit+bombparty'}, '*');
+		window.addEventListener("message", (d) => {
+			switch (d.data.name) {
+				case "jklm.fun+":
+					parentWindow.postMessage({name: 'gameInit+bombparty'}, '*');
+					break;
+				case "bombparty+hyphenBind":
+					$set('bombparty+hyphenBind', d.data.bind);
+					break;
+			}
+		})
+
+		$waitUntilElement("form > input.styled").then(async (input) => {
+			input.addEventListener("keydown", (e) => {
+				const hyphenBind = $get('bombparty+hyphenBind', 'Minus');
+				if (e.code === hyphenBind) {
+					e.preventDefault();
+
+					const start = input.selectionStart;
+					const end = input.selectionEnd;
+					const originalValue = input.value;
+					input.value = originalValue.slice(0, start) + '-' + originalValue.slice(end);
+					input.selectionStart = input.selectionEnd = start + 1;
+
+					const inputEvent = new InputEvent('input', {
+						bubbles: true,
+						cancelable: true,
+						inputType: 'insertText',
+						data: '-'
+					});
+					input.dispatchEvent(inputEvent);
+				}
+			})
+		})
+	} else {
+		parentWindow.postMessage({name: 'gameInit+other'}, '*');
+	}
 } else {
 	// In lobby/homepage
 	const	authModal	= await import('./scripts/home/authModal.js'),

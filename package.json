@@ -21,7 +21,8 @@
   "homepage": "https://github.com/mawyuri/jklm.fun-plus#readme",
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.33",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vite-plugin-css-injected-by-js": "^5.0.2"
   },
   "dependencies": {
     "dompurify": "^3.4.1"

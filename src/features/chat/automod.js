@@ -106,6 +106,9 @@ export function createRule(id, {c: condition, i: input, o: outcome}) {
 				actionExecute(outcome, data.peerId);
 		}
 		socket.on('chatterAdded', listener);
+		socket.on('chat', (profile, _) => {
+			listener(profile);
+		})
 		socket.emit('getChatterProfiles', (profiles) => {
 			profiles.forEach(p => {if (!p.roles.includes('banned')) listener(p)});
 		});
@@ -117,6 +120,9 @@ export function createRule(id, {c: condition, i: input, o: outcome}) {
 			}
 		}
 		socket.on('chatterAdded', listener);
+		socket.on('chat', (profile, _) => {
+			listener(profile);
+		})
 		socket.emit('getChatterProfiles', (profiles) => {
 			profiles.forEach(p => {if (!p.roles.includes('banned')) listener(p)});
 		});

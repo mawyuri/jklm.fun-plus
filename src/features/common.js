@@ -1,8 +1,9 @@
 // Common Shit.
-export const $version = '1.0.3.1';
+export const $version = '1.0.4';
 
 export const win = window;
 export const doc = document;
+export const html = doc.documentElement;
 export const $get = (s,n) => localStorage.getItem(s) || n;
 export const $set = (s,v) => localStorage.setItem(s,v);
 export const $log = (x) => console.log(x);

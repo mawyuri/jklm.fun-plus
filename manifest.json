@@ -1,8 +1,19 @@
 {
 	"name": "JKLM.fun+",
 	"description": "QoL improvements and extra features for JKLM.fun",
-	"version": "1.0.3.1",
+	"version": "1.0.4",
 	"manifest_version": 3,
+	"background": {
+		"service_worker": "src/cors.js"
+	},
+	"permissions": [
+		"activeTab"
+	],
+	"host_permissions": [
+		"https://*.jklm.fun/*",
+		"https://*.catbox.moe/*",
+		"https://frisk.page/f/*"
+	],
 	"icons":
 	{
 		"16": "src/images/16.png",
@@ -13,7 +24,8 @@
 	"content_scripts": [
 		{
 			"js": ["src/loader.js"],
-			"matches": ["https://jklm.fun/*"]
+			"matches": ["https://*.jklm.fun/*"],
+			"all_frames": true
 		}
 	]
 }
