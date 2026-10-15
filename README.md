@@ -1,4 +1,6 @@
 # JKLM.fun+
+> [!WARNING]
+> Unrelated to OMetaVR's [JKLM+](https://github.com/OMetaVR/JKLM-) nor is this an extension used to cheat in BombParty / PopSauce.
 
 > [!NOTE]
 > This extension stores a randomly generated string directly inside `localStorage` used to authenticate with the backend server. Switching browsers/clearing data may lead to losing your JKLM.fun+ account. To save your token, open developer tools (F12) on [JKLM.fun](https://jklm.fun) and click on Application > Local Storage > https://jklm.fun or go inside Console and run `localStorage.getItem('chat+token')`.
@@ -18,7 +20,7 @@ An extension that aims to improve the social experience, quality-of-life of many
 - Suggest anything over at the issues page or contact me on Discord (same username.)
 
 ## Installation
-> [!NOTE]
+> [!WARNING]
 > This extension is currently unstable. Bugs will exist, if any was found contact me on Discord (same username) or make open an issue in the repository page.
 
 * Download the ZIP file from the [latest release](https://github.com/mawyuri/jklm.fun-plus/releases/latest) (not source code).
